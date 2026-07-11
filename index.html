@@ -112,7 +112,8 @@ const AXES=[
 // 注意: ax配列は[財布,支払,F,速度,協業,制度]なのでAXES.iはその添字（協業=4,制度=5）
 AXES[4].i=4; AXES[5].i=5; AXES[3].i=3; AXES[0].i=2; AXES[1].i=0; AXES[2].i=1;
 let axSel=0; // AXES配列上の選択位置（初期=フィージビリティ）
-let ucs=load("ucb-data",EMBED), soc=load("ucb-social",{votes:{},comments:{}});
+let STORAGE_KEY="uc-theme-db-"+curTheme+"-v1", SOCIAL_KEY="uc-theme-social-"+curTheme+"-v1";
+let ucs=load(STORAGE_KEY,EMBED), soc=load(SOCIAL_KEY,{votes:{},comments:{}});
 if(!soc.votes2){soc.votes2={};for(const id in (soc.votes||{})){soc.votes2[id]={};for(const nm in soc.votes[id])soc.votes2[id][nm]={m:soc.votes[id][nm]}}}
 const STATS=["検討中","ヒアリング済","PoC設計","実行中","制度接続"];
 const SCOL={"検討中":"#8B98A6","ヒアリング済":"#4A90EC","PoC設計":"#12A5B8","実行中":"#E58318","制度接続":"#3D4DB7"};
@@ -120,10 +121,10 @@ let sel=null, editing=null;
 document.getElementById("me").value=localStorage.getItem("ucb-name")||"";
 document.getElementById("me").oninput=e=>localStorage.setItem("ucb-name",e.target.value);
 function load(k,d){try{const v=localStorage.getItem(k);const p=v?JSON.parse(v):d;
- if(k==="ucb-data"&&Array.isArray(p)){const m=Object.fromEntries(EMBED.map(u=>[u.id,u]));p.forEach(u=>{const e=m[u.id]||{};if(u.ax===undefined)u.ax=e.ax||null;for(const f of ["dtype","gng","org","comp","diff","inst","bud","stat","d"]){if(u[f]===undefined||u[f]===""&&f!=="org")u[f]=e[f]!==undefined?e[f]:(f==="stat"?"検討中":f==="d"?[]:"")}})}
+ if(Array.isArray(p)&&p.length&&p[0]&&p[0].id){const m=Object.fromEntries(EMBED.map(u=>[u.id,u]));p.forEach(u=>{const e=m[u.id]||{};if(u.ax===undefined)u.ax=e.ax||null;for(const f of ["dtype","gng","org","comp","diff","inst","bud","stat","d"]){if(u[f]===undefined||u[f]===""&&f!=="org")u[f]=e[f]!==undefined?e[f]:(f==="stat"?"検討中":f==="d"?[]:"")}})}
  return p}catch(e){return d}}
-function saveD(){localStorage.setItem("ucb-data",JSON.stringify(ucs));renderAll()}
-function saveS(){localStorage.setItem("ucb-social",JSON.stringify(soc));renderAll()}
+function saveD(){localStorage.setItem(STORAGE_KEY,JSON.stringify(ucs));renderAll()}
+function saveS(){localStorage.setItem(SOCIAL_KEY,JSON.stringify(soc));renderAll()}
 const byId=id=>ucs.find(u=>u.id===id);
 const ups=id=>ucs.filter(u=>(u.to||[]).includes(id)).map(u=>u.id);
 const esc=s=>(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;");
@@ -357,7 +358,7 @@ function switchTheme(t){
  CLUSTERS=THEMES[t].clusters.map((c,i)=>({id:c.id,name:c.name,color:CLPAL[i%CLPAL.length]}));
  buildCL();
  sel=null; editing=null; msel=null;
- ucs=load("ucb-data",EMBED); 
+ ucs=load(STORAGE_KEY,EMBED); 
  const s=(()=>{try{const v=localStorage.getItem(SOCIAL_KEY);return v?JSON.parse(v):null}catch(e){return null}})();
  soc=s||{votes:{},comments:{}}; if(!soc.votes2)soc.votes2={};
  initMapControls();
